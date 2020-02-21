@@ -69,25 +69,25 @@ public class Scanner extends CordovaPlugin {
         pluginResult.setKeepCallback(true);
         mMainCallback.sendPluginResult(pluginResult);
     }
-    @Override
+    /*@Override
     public void coolMethod(String message, CallbackContext callbackContext) {
         if (message != null && message.length() > 0) {
             callbackContext.success(message);
         } else {
             callbackContext.error("Expected one non-empty string argument.");
         }
-    }
+    }*/
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if ("init".equals(action)) {
 			mMainCallback = callbackContext;
 			this.onResume(false);
 			return true;
-		} else if("coolMethod".equals(action)) {
+		} /*else if("coolMethod".equals(action)) {
             String message = args.getString(0);
-            this.coolMethod(message, callbackContext);
+            this.coolMethod(action, callbackContext);
             return true;
-        }
+        }*/
         callbackContext.error(action + " is not a supported action");
 		return false;
     }
