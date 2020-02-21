@@ -16,7 +16,25 @@ public class Scanner extends CordovaPlugin {
 	private final static String EVENT_PREFIX = "scanner";
     private CallbackContext mMainCallback;
     
-    @Override
+    private BroadcastReceiver mScanReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			byte[] barocode = intent.getByteArrayExtra("barocode");
+			int barocodelen = intent.getIntExtra("length", 0);
+			byte temp = intent.getByteExtra("barcodeType", (byte) 0);
+			String barcodeStr = new String(barocode, 0, barocodelen);
+
+			JSONArray jsEvent = new JSONArray();
+			jsEvent.put(EVENT_PREFIX + "Scan");
+			jsEvent.put(barcodeStr);
+			PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsEvent);
+			pluginResult.setKeepCallback(true);
+			mMainCallback.sendPluginResult(pluginResult);
+
+			sm.stopScan();
+		}
+	};
 	protected void onResume(boolean multitasking) {
         
 
