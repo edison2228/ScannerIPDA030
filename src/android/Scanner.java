@@ -49,35 +49,46 @@ public class Scanner extends CordovaPlugin {
 		sm = new ScanDevice();
 	}
     @Override
-    protected void onResume(boolean multitasking) {
-        
-
+    public void onResume(boolean multitasking) {
         super.onResume(multitasking);
-		super.onResume();
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(SCAN_ACTION);
-		registerReceiver(mScanReceiver, filter);
-	}
-    @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        if ("init".equals(action)) {
-			mMainCallback = callbackContext;
-			this.onResume(false);
-			return true;
-		} else if(action.equals("coolMethod")) {
-            String message = args.getString(0);
-            this.coolMethod(message, callbackContext);
-            return true;
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(SCAN_ACTION);
+        this.cordova.getActivity().registerReceiver(mScanReceiver, filter);
+
+        if (sm.isScanOpened() && sm.getOutScanMode() != 0) {
+            sm.setOutScanMode(0);
         }
-        return false;
+
+        JSONArray jsEvent = new JSONArray();
+        jsEvent.put(EVENT_PREFIX + "PluginResume");
+        int isOpen  = (sm.isScanOpened() ? 1 : 0);
+        int vibrate  = (sm.getScanVibrateState() ? 1 : 0);
+        int beep  = (sm.getScanBeepState() ? 1 : 0);
+        jsEvent.put(isOpen << 2 | vibrate << 1 | beep);
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsEvent);
+        pluginResult.setKeepCallback(true);
+        mMainCallback.sendPluginResult(pluginResult);
     }
-	@Override
-    private void coolMethod(String message, CallbackContext callbackContext) {
+    @Override
+    public void coolMethod(String message, CallbackContext callbackContext) {
         if (message != null && message.length() > 0) {
             callbackContext.success(message);
         } else {
             callbackContext.error("Expected one non-empty string argument.");
         }
     }
-
+    @Override
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+        if ("init".equals(action)) {
+			mMainCallback = callbackContext;
+			this.onResume(false);
+			return true;
+		} else if("coolMethod".equals(action)) {
+            String message = args.getString(0);
+            this.coolMethod(message, callbackContext);
+            return true;
+        }
+        callbackContext.error(action + " is not a supported action");
+		return false;
+    }
 }
