@@ -3,6 +3,13 @@ package cordova.plugin.ipda030.scanner;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.device.ScanDevice;
+import java.util.ArrayList;
+import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,8 +41,15 @@ public class Scanner extends CordovaPlugin {
 
 			sm.stopScan();
 		}
-	};
-	protected void onResume(boolean multitasking) {
+    };
+    @Override
+	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+		super.initialize(cordova, webView);
+
+		sm = new ScanDevice();
+	}
+    @Override
+    protected void onResume(boolean multitasking) {
         
 
         super.onResume(multitasking);
@@ -57,7 +71,7 @@ public class Scanner extends CordovaPlugin {
         }
         return false;
     }
-
+	@Override
     private void coolMethod(String message, CallbackContext callbackContext) {
         if (message != null && message.length() > 0) {
             callbackContext.success(message);
